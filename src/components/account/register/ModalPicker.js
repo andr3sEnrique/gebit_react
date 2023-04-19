@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View, TouchableOpacity, Dimensions, ScrollView } from 'react-native'
 import React, {useState, useEffect, useLayoutEffect} from 'react'
 import Toast from "react-native-toast-message";
+import { host } from '../../global';
 export default function ModalPicker(props) {
   const [data, setData] = useState([]);
   const [modalHeight, setModalHeight] = useState(0);
@@ -14,20 +15,21 @@ export default function ModalPicker(props) {
   }, [data]);
 
   useEffect(() => {
-    fetch("http://192.168.100.233:8080/api-gebit/group/", {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${host}/api-gebit/group/`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
-        return response.json();
-      })
-      .then((json) => {
+        
+        const json = await response.json();
         const sortedData = json.data.sort((a, b) => {
           if (a.degree === b.degree) {
             return a.letter.localeCompare(b.letter);
@@ -35,15 +37,17 @@ export default function ModalPicker(props) {
           return a.degree - b.degree;
         });
         setData(sortedData);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("There was a problem with the request:", error);
         Toast.show({
           type: "error",
           position: "bottom",
           text1: "Algo salio mal",
         });
-      });
+      }
+    };
+  
+    fetchData();
   }, []);
   
 

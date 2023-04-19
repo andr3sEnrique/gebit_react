@@ -1,13 +1,14 @@
 import { StyleSheet, Text, View, TextInput, Image, useWindowDimensions, Modal, } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Button, Input, Icon } from "react-native-elements";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Perfil from "../../../../assets/image.png";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Loader from "../../LoaderPass";
+import { host } from "../../global";
+import { AuthContext } from "../../AuthContext";
 export default function ProfileForm(props) {
   const { name, lastname, username, grado, grupo } = props;
   const [showPass, setShowPass] = useState(false);
@@ -17,6 +18,9 @@ export default function ProfileForm(props) {
   const navigation = useNavigation();
   const { height } = useWindowDimensions();
   const [showModal, setShowModal] = useState(false);
+  const { removeToken } = useContext(AuthContext);
+  const { removeId } = useContext(AuthContext);
+  const { removeBitacora } = useContext(AuthContext);
   const showHidePass = () => {
     setShowPass(!showPass);
   };
@@ -28,7 +32,9 @@ export default function ProfileForm(props) {
   };
   const logout = async () => {
     // Borrar el token de autenticación almacenado en el dispositivo
-    await AsyncStorage.removeItem("key");
+    await removeToken();
+    await removeId();
+    await removeBitacora();
 
     // Navegar a la pantalla de inicio de sesión
     navigation.navigate("login");
@@ -73,7 +79,7 @@ export default function ProfileForm(props) {
       console.log("pass ->", formValue.password);
       console.log("newPass ->", formValue.newPassword);
       console.warn("entro al submit");
-      fetch("http://192.168.100.233:8080/api-gebit/auth/reset-password", {
+      fetch(`${host}/api-gebit/auth/reset-password`, {
 
         method: "POST",
         headers: {

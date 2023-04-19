@@ -1,26 +1,33 @@
 import { StyleSheet, Text, View, Image } from 'react-native'
-import React, { useState} from 'react'
+import React, { useState, useContext, useEffect} from 'react'
 import { Button } from 'react-native-elements'
 import CameraComponent from '../components/Scanner/CameraComponent'
 import HeaderComponent from '../components/Scanner/HeaderComponent'
+import { AuthContext } from '../components/AuthContext';	
 export default function EscanerScreen() {
   const [isCameraVisible, setIsCameraVisible] = useState(false);
   const [picture, setPicture] = useState(null);
+  const { Bitacora } = useContext(AuthContext);
   const handleTakePicture = (data) => {
     setPicture(data.uri);
     setIsCameraVisible(false);
   };
+  useEffect(() => {
+    console.log("bitacora ->",Bitacora);
+  }, []);
+
 
   const handleCloseCamera = () => {
     setIsCameraVisible(false);
   };
+  const buttonMessage = Bitacora ? "Escanear Salida" : "Escanear Equipo de Computo";
   return (
     <View style={styles.container}>
       <HeaderComponent />
       <Button
         containerStyle={styles.btnContainer}
         buttonStyle={styles.btn}
-        title="Escanear Equipo de Computo"
+        title={buttonMessage}
         onPress={() => setIsCameraVisible(true)}
       />
       <CameraComponent

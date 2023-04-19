@@ -1,8 +1,6 @@
 import { StyleSheet, Text, View, Image, useWindowDimensions } from 'react-native'
 import React from 'react'
 import Logo from '../../assets/logo.png'
-import ImageArriba from '../components/account/Login/ImageArriba'
-import ImageAbajo from '../components/account/Login/ImageAbajo'
 import RegisterForm from '../components/account/register/RegisterForm'
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 

@@ -6,8 +6,8 @@ import Toast from "react-native-toast-message";
 import { Button, Icon } from 'react-native-elements';
 export default function IndexScreen({ route }) {
   const [showModal, setShowModal] = useState(false);
-  const id = route.params?.id;
   const mensaje = route.params?.mensaje;
+  const id = route.params?.id;
   useEffect(() => {
     switch (mensaje) {
       case "escaneado":
@@ -20,7 +20,7 @@ export default function IndexScreen({ route }) {
       default:
         break;
     }
-  })
+  },[])
   const onCloseModal = () => {
     setShowModal(false);
   };
@@ -31,7 +31,7 @@ export default function IndexScreen({ route }) {
         <Button title='Añadir' iconRight={true} 
         icon={<Icon name="plus" type="font-awesome" size={20} color="white" iconStyle={styles.add}/> }
          containerStyle={styles.btnContainer} buttonStyle={styles.btn} onPress={()=>setShowModal(true)}  />
-        <ModalForm showModal={showModal} onCloseModal={onCloseModal} />
+        <ModalForm showModal={showModal} onCloseModal={onCloseModal}  id={id}/>
       </View>
       <ReportsTable/>
     </View>

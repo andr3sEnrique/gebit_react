@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
 import ModalPicker from "./ModalPicker";
 import Loader from "../../Loader";
+import { host } from "../../global";
 export default function RegisterForm() {
   const [showPass, setShowPass] = useState(false);
   const [showRepeatPass, setShowRepeatPass] = useState(false);
@@ -15,6 +16,7 @@ export default function RegisterForm() {
   const [isModalVisible, setisModalVisible] = useState(false);
   const [selectedValue, setSelectedValue] = useState("Selecciona tu grupo");
   const [isLoading, setIsLoading] = useState(false);
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@utez\.edu\.mx$/;;
   const setData = (option) => {
     setSelectedValue(option);
   }
@@ -48,68 +50,81 @@ export default function RegisterForm() {
     onSubmit: async (formValue) => {
       console.warn("entro");
       console.log(formValue.nombre, formValue.apellidos, formValue.grupo, formValue.email, formValue.password, formValue.repeatPassword);
-      if (selectedValue == "Selecciona tu grupo") {
-        Toast.show({
-          type: "error",
-          position: "bottom",
-          text1: "Selecciona un grupo",
-        });
-      } else {
-        setIsLoading(true);
-        fetch("http://192.168.100.233:8080/api-gebit/student/", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name : formValue.nombre,
-        lastname : formValue.apellidos,
-        status : true,
-        group : {
-          id : selectedValue.id,
-        },
-        user : {
-          username : formValue.email,
-          password : formValue.password,
-        },
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok" + response);
-        }
-        
-        return response.json();
-      })
-      .then((json) => {
-        console.log("segundo then")
-        console.log(json);
-        console.log(json.status)
-        console.log(json.error)
-        console.log(json.message)
-        if (json.status === 400) {
+      if (emailRegex.test(formValue.email)) {
+        if (selectedValue == "Selecciona tu grupo") {
           Toast.show({
             type: "error",
             position: "bottom",
-            text1: json.message,
+            text1: "Selecciona un grupo",
           });
-        } else if (json.status === 200) {
-          navigation.navigate("login", {params: {mensaje: "registro",}});
-        }
-        
+        } else {
+          setIsLoading(true);
+          fetch(`${host}/api-gebit/student/`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name : formValue.nombre,
+          lastname : formValue.apellidos,
+          status : true,
+          group : {
+            id : selectedValue.id,
+          },
+          user : {
+            username : formValue.email,
+            password : formValue.password,
+          },
+        }),
       })
-      .catch((error) => {
-        console.error("There was a problem with the request:", error);
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok" + response);
+          }
+          
+          return response.json();
+        })
+        .then((json) => {
+          console.log("segundo then")
+          console.log(json);
+          console.log(json.status)
+          console.log(json.error)
+          console.log(json.message)
+          if (json.status === 400) {
+            Toast.show({
+              type: "error",
+              position: "bottom",
+              text1: json.message,
+            });
+          } else if (json.status === 200) {
+            navigation.navigate("login", {params: {mensaje: "registro",}});
+          }
+          
+        })
+        .catch((error) => {
+          console.error("There was a problem with the request:", error);
+          Toast.show({
+            type: "error",
+            position: "bottom",
+            text1: "Ocurrio un error al registrar el usuario",
+          });
+        });
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 3000);
+        }
+      }else{
         Toast.show({
           type: "error",
           position: "bottom",
-          text1: "Ocurrio un error al registrar el usuario",
+          text1: "Error",
+          text2: "El correo debe ser instucional",
+          visibilityTime: 3000,
+          autoHide: true,
+          topOffset: 30,
+          bottomOffset: 40,
         });
-      });
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 3000);
       }
     },
   });

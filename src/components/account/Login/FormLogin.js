@@ -1,23 +1,24 @@
 import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useContext } from "react";
 import { useFormik } from "formik";
 import { Input, Icon, Button } from "react-native-elements";
 import * as Yup from "yup";
 import ButtonForm from "./ButtonForm";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from "react-native-toast-message";
 import Loader from "../../Loader";
+import { host } from '../../global'
+import { AuthContext } from "../../AuthContext";
 export default function FormLogin() {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const onButtonPassPressed = () => {
-    console.warn("Button Password pressed");
-  };
-
   const [showPass, setShowPass] = useState(false);
   const [text, setText] = useState("");
   const [text2, setText2] = useState("");
+  
+  const onButtonPassPressed = () => {
+    console.warn("Button Password pressed");
+  };
   useEffect(() => {
     setIsLoading(false);
   }, []);
@@ -38,66 +39,72 @@ export default function FormLogin() {
     onSubmit: async (formValue) => {
       console.warn("entro");
       login(formValue.email, formValue.password);
-      /*  try {
-           const auth = getAuth()
-           await createUserWithEmailAndPassword(
-               auth, formValue.email, formValue.password
-           )
-       } catch (error) {
-           console.log(error)
-       } */
     },
   });
   const mensaje = "acceso";
+  const {saveToken } = useContext(AuthContext);
+  const { saveId } = useContext(AuthContext);
+
   const login = (email, password) => {
     setIsLoading(true);
     console.log("entro al lg");
     console.log(email, password);
     // ipUtez: 192.168.67.18
     //ip casa: 192.168.100.233
-    fetch("http://192.168.100.233:8080/api-gebit/auth/login/", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: email,
-        password: password,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        setText("");
-        setText2("");
-
-        return response.json();
+    try {
+      fetch(`${host}/api-gebit/auth/login/`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: email,
+          password: password,
+        }),
       })
-      .then((json) => {
-        console.log("Entro al log")
-        console.log(json);
-        console.log("token ", json.token)
-        const token = json.token;
-        AsyncStorage.setItem("token", token);
-        const nombre = json.student.name;
-        console.log("nombre ", nombre);
-        navigation.navigate("index", {screen: "Perfil", params: {mensaje: "acceso", 
-        name: json.student.name, lastname: json.student.lastname, 
-        username: json.user.username ,id: json.student.id, token: token, 
-        grado: json.student.group.degree, grupo: json.student.group.letter}});
-      })
-      .catch((error) => {
-        console.error("There was a problem with the request:", error);
-        
-          setIsLoading(false);
-        Toast.show({
-          type: "error",
-          position: "bottom",
-          text1: "Usuario y/o contraseña incorrectos",
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          setText("");
+          setText2("");
+  
+          return response.json();
+        })
+        .then((json) => {
+          console.log("Entro al log")
+          console.log(json);
+          console.log("token-> ", json.token)
+          console.log("user-> ", json.user.id)
+          console.log("user2 ->", json.student.user.id)
+          saveToken(json.token);
+          saveId(JSON.stringify(json.user.id));
+          const nombre = json.student.name;
+          console.log("nombre ", nombre);
+          navigation.navigate("index", {screen: "Perfil", params: {mensaje: "acceso", 
+          name: json.student.name, lastname: json.student.lastname, 
+          username: json.user.username ,id: json.student.id, token: json.token, 
+          grado: json.student.group.degree, grupo: json.student.group.letter}});
+        })
+        .catch((error) => {
+          console.error("There was a problem with the request:", error);
+          
+            setIsLoading(false);
+          Toast.show({
+            type: "error",
+            position: "bottom",
+            text1: "Usuario y/o contraseña incorrectos",
+          });
         });
+    } catch (error) {
+      console.log("error-> ",error)
+      Toast.show({
+        type: "error",
+        position: "bottom",
+        text1: "Ocurrio un error",
       });
+    }
       setTimeout(() => {
         setIsLoading(false);
       }, 3000);
