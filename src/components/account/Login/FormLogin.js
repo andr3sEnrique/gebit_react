@@ -9,15 +9,16 @@ import Toast from "react-native-toast-message";
 import Loader from "../../Loader";
 import { host } from '../../global'
 import { AuthContext } from "../../AuthContext";
+import ModalForm from "./ModalForm";
 export default function FormLogin() {
   const navigation = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [text, setText] = useState("");
   const [text2, setText2] = useState("");
-  
-  const onButtonPassPressed = () => {
-    console.warn("Button Password pressed");
+  const [showModal, setShowModal] = useState(false);
+  const btnForgotPass = () => {
+    setShowModal(true);
   };
   useEffect(() => {
     setIsLoading(false);
@@ -110,6 +111,10 @@ export default function FormLogin() {
       }, 3000);
       
   };
+
+  const onCloseModal = () => {
+    setShowModal(false);
+  };
   const showHidePass = () => {
     setShowPass(!showPass);
   };
@@ -178,7 +183,7 @@ export default function FormLogin() {
       )}
       <ButtonForm
         text="¿Haz olvidado tu contraseña?"
-        onPress={onButtonPassPressed}
+        onPress={btnForgotPass}
         type="TERTIARY"
       />
       <Button
@@ -194,6 +199,7 @@ export default function FormLogin() {
       />
         </View>
       )}
+      <ModalForm showModal={showModal} onCloseModal={onCloseModal}/>
       
     </View>
   );
